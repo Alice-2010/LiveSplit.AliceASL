@@ -1,0 +1,48 @@
+﻿name: Publish Release
+
+on:
+    workflow_dispatch:
+        inputs:
+            tag:
+                description: 'Tag to release'
+                required: true
+                type: string
+            generate_release_notes:
+                description: 'Generate release notes?'
+                required: true
+                type: boolean
+            change_log:
+                description: 'Change log'
+                required: false
+                type: string
+            prerelease:
+                description: 'Is this a prerelease?'
+                required: true
+                type: boolean
+    
+jobs:
+    build:
+        runs-on: windows-latest
+        if: github.ref == 'refs/heads/master'
+        strategy:
+            matrix:
+                configuration: [Release]
+        steps:
+        - name: Checkout
+          uses: actions/checkout@v4
+        - name: Setup .NET
+          uses: actions/setup-dotnet@v4
+          with:
+            dotnet-version: 9.0.200
+        - name: Build
+          run: dotnet build -c ${{ matrix.configuration }}
+        - name: Publish
+          uses: softprops/action-gh-release@v2
+          with:
+            files: bin/${{ matrix.configuration }}/LiveSplit.AliceASL.dll
+            tag: ${{ github.event.inputs.tag }}
+            prerelease: ${{ github.event.inputs.prerelease }}
+            generate_release_notes: ${{ github.event.inputs.generate_release_notes }}
+            body: ${{ github.event.inputs.change_log }}
+            make_latest: true
+            append_body: true
