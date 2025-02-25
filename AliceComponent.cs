@@ -370,7 +370,7 @@ namespace LiveSplit.AliceASL
                     ? this.Timer.CurrentState.CurrentTime.GameTime.ToString()
                     : this.Timer.CurrentState.CurrentTime.RealTime.ToString();
                 if (time != "")
-                    log += " " + time;
+                    log += $" {time} {(this.Timer.CurrentState.CurrentTimingMethod == TimingMethod.RealTime ? "RTA" : "LRT")}";
             }
             log += "]: " + text;
             Trace.WriteLine(log);
