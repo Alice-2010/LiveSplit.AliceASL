@@ -65,6 +65,7 @@ namespace LiveSplit.AliceASL
             uint bandersnatchPhaseCurrent = Convert.ToUInt32(values["BandersnatchPhase"]);
             float stayneHealthCurrent = Convert.ToSingle(values["StayneHealth"]);
             uint jabberwockyPhaseCurrent = Convert.ToUInt32(values["JabberwockyPhase"]);
+            uint jabberwockyPhase4CounterCurrent = Convert.ToUInt32(values["JabberwockyP4Counter"]);
 
             // pause LRT if game is loading
             if (this.Settings["lrt"].Enabled)
@@ -137,7 +138,43 @@ namespace LiveSplit.AliceASL
                 // check for auto reset
                 if (this.Settings["reset"].Enabled)
                 {
-                    
+                    if (this.Settings["il"].Enabled)
+                    {
+                        // TODO: find better addresses for ILs - maybe video number?
+                        //// bandersnatch
+                        //if (mapIDCurrent == 20 && audioStatusCurrent == 4 && mapSectorCurrent == 3)
+                        //{
+                        //    this.WriteLog("Starting New Bandersnatch Run - Resetting");
+                        //    this.Timer.Reset();
+                        //    return;
+                        //}
+
+                        //// stayne
+                        //if (mapIDCurrent == 85 && audioStatusCurrent == 4)
+                        //{
+                        //    this.WriteLog("Starting New Stayne Run - Resetting");
+                        //    this.Timer.Reset();
+                        //    return;
+                        //}
+
+                        //// jabberwocky
+                        //if (mapIDCurrent == 100 && audioStatusCurrent == 4 && mapSectorCurrent == 2)
+                        //{
+                        //    this.WriteLog("Starting New Jabberwocky Run - Resetting");
+                        //    this.Timer.Reset();
+                        //    return;
+                        //}
+                    }
+                    else
+                    {
+                        //// full game run
+                        //if (mapIDCurrent == 10 && audioStatusCurrent == 4)
+                        //{
+                        //    this.WriteLog("Starting New Full Game Run - Resetting");
+                        //    this.Timer.Reset();
+                        //    return;
+                        //}
+                    }
                 }
 
                 // check for auto split
@@ -242,13 +279,13 @@ namespace LiveSplit.AliceASL
                             return;
                         }
 
-                        if (this.SplitsDone.Contains("stayne0") && !this.SplitsDone.Contains("stayne1") && stayneHealthCurrent == 1000f)
+                        if (this.SplitsDone.Contains("stayne0") && !this.SplitsDone.Contains("stayne1") && stayneHealthCurrent <= 1000f)
                         {
                             this.Split("stayne1");
                             return;
                         }
 
-                        if (this.SplitsDone.Contains("stayne1") && !this.SplitsDone.Contains("stayne2") && stayneHealthCurrent == 500f)
+                        if (this.SplitsDone.Contains("stayne1") && !this.SplitsDone.Contains("stayne2") && stayneHealthCurrent <= 500f)
                         {
                             this.Split("stayne2");
                             return;
@@ -298,7 +335,7 @@ namespace LiveSplit.AliceASL
                             return;
                         }
 
-                        if (this.SplitsDone.Contains("jabber3") && !this.SplitsDone.Contains("jabber4") && mapSectorCurrent == 2 && jabberwockyPhaseCurrent == 4 && audioStatusPrevious == 1 && audioStatusCurrent == 4)
+                        if (this.SplitsDone.Contains("jabber3") && !this.SplitsDone.Contains("jabber4") && mapSectorCurrent == 2 && jabberwockyPhase4CounterCurrent == 3)
                         {
                             this.Split("jabber4");
                             return;

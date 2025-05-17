@@ -25,7 +25,7 @@ namespace LiveSplit.AliceASL.Memory
         private GameVersion GameVersion { get; set; }
         private IntPtr Mem1 { get; set; }
         private Process Process { get; set; }
-        public AliceAddresses(Process proc, GameVersion version): this(proc, version, IntPtr.Zero) { }
+        public AliceAddresses(Process proc, GameVersion version) : this(proc, version, IntPtr.Zero) { }
         public AliceAddresses(Process proc, GameVersion version, IntPtr mem1)
         {
             if (version == GameVersion.Steam && proc == null)
@@ -37,178 +37,228 @@ namespace LiveSplit.AliceASL.Memory
             this.Process = proc;
         }
 
-        public Pointer<Single> GameTimePtr()
+        public Pointer<Single> GameTimePtr
         {
-            Pointer<Single> pointer;
-            switch (this.GameVersion)
+            get
             {
-                case GameVersion.Steam:
-                    pointer = new Pointer<Single>(this.Process.MainModule.BaseAddress, 0x44B8A8, 0x8C, 0x44, 0x10);
-                    break;
-                case GameVersion.DolphinPAL:
-                    pointer = new Pointer<Single>(this.Mem1, 0x61CAE4);
-                    break;
-                case GameVersion.DolphinNTSC:
-                    pointer = new Pointer<Single>(IntPtr.Zero); // TODO: Find this
-                    break;
-                case GameVersion.Invalid:
-                default:
-                    pointer = new Pointer<Single>(IntPtr.Zero);
-                    break;
+                Pointer<Single> pointer;
+                switch (this.GameVersion)
+                {
+                    case GameVersion.Steam:
+                        pointer = new Pointer<Single>(this.Process.MainModule.BaseAddress, 0x44B8A8, 0x8C, 0x44, 0x10);
+                        break;
+                    case GameVersion.DolphinPAL:
+                        pointer = new Pointer<Single>(this.Mem1, 0x61CAE4);
+                        break;
+                    case GameVersion.DolphinNTSC:
+                        pointer = new Pointer<Single>(IntPtr.Zero); // TODO: Find this
+                        break;
+                    case GameVersion.Invalid:
+                    default:
+                        pointer = new Pointer<Single>(IntPtr.Zero);
+                        break;
+                }
+                return pointer;
             }
-            return pointer;
         }
-        public Pointer<Int32> MapIDPtr()
+        public Pointer<Int32> MapIDPtr
         {
-            Pointer<Int32> pointer;
-            switch (this.GameVersion)
+            get
             {
-                case GameVersion.Steam:
-                    pointer = new Pointer<Int32>(this.Process.MainModule.BaseAddress, 0x44B8A8, 0x8C, 0x2BC);
-                    break;
-                case GameVersion.DolphinPAL:
-                    pointer = new Pointer<Int32>(this.Mem1, 0x77F870);
-                    break;
-                case GameVersion.DolphinNTSC:
-                    pointer = new Pointer<Int32>(IntPtr.Zero); // TODO: Find this
-                    break;
-                case GameVersion.Invalid:
-                default:
-                    pointer = new Pointer<Int32>(IntPtr.Zero);
-                    break;
+                Pointer<Int32> pointer;
+                switch (this.GameVersion)
+                {
+                    case GameVersion.Steam:
+                        pointer = new Pointer<Int32>(this.Process.MainModule.BaseAddress, 0x44B8A8, 0x8C, 0x2BC);
+                        break;
+                    case GameVersion.DolphinPAL:
+                        pointer = new Pointer<Int32>(this.Mem1, 0x77F870);
+                        break;
+                    case GameVersion.DolphinNTSC:
+                        pointer = new Pointer<Int32>(IntPtr.Zero); // TODO: Find this
+                        break;
+                    case GameVersion.Invalid:
+                    default:
+                        pointer = new Pointer<Int32>(IntPtr.Zero);
+                        break;
+                }
+                return pointer;
             }
-            return pointer;
-        }
-
-        public Pointer<Int32> MapSectorPtr()
-        {
-            Pointer<Int32> pointer;
-            switch (this.GameVersion) {
-                case GameVersion.Steam:
-                    pointer = new Pointer<Int32>(this.Process.MainModule.BaseAddress, 0x44B8A8, 0x8C, 0x18, 0x18);
-                    break;
-                case GameVersion.DolphinPAL:
-                    pointer = new Pointer<Int32>(this.Mem1, 0x77676C);
-                    break;
-                case GameVersion.DolphinNTSC:
-                    pointer = new Pointer<Int32>(IntPtr.Zero); // TODO: Find this
-                    break;
-                case GameVersion.Invalid:
-                default:
-                    pointer = new Pointer<Int32>(IntPtr.Zero);
-                    break;
-            }
-            return pointer;
         }
 
-        public Pointer<UInt32> AliceIDPtr()
+        public Pointer<Int32> MapSectorPtr
         {
-            Pointer<UInt32> pointer;
-            switch (this.GameVersion)
+            get
             {
-                case GameVersion.Steam:
-                    pointer = new Pointer<UInt32>(this.Process.MainModule.BaseAddress, 0x44B8A8, 0x8C, 0x8, 0x28, 0x9D0);
-                    break;
-                case GameVersion.DolphinPAL:
-                    pointer = new Pointer<UInt32>(this.Mem1, 0x7DE5D4, 0x9D0);
-                    break;
-                case GameVersion.DolphinNTSC:
-                    pointer = new Pointer<UInt32>(IntPtr.Zero); // TODO: Find this
-                    break;
-                case GameVersion.Invalid:
-                default:
-                    pointer = new Pointer<UInt32>(IntPtr.Zero);
-                    break;
+                Pointer<Int32> pointer;
+                switch (this.GameVersion)
+                {
+                    case GameVersion.Steam:
+                        pointer = new Pointer<Int32>(this.Process.MainModule.BaseAddress, 0x44B8A8, 0x8C, 0x18, 0x18);
+                        break;
+                    case GameVersion.DolphinPAL:
+                        pointer = new Pointer<Int32>(this.Mem1, 0x77676C);
+                        break;
+                    case GameVersion.DolphinNTSC:
+                        pointer = new Pointer<Int32>(IntPtr.Zero); // TODO: Find this
+                        break;
+                    case GameVersion.Invalid:
+                    default:
+                        pointer = new Pointer<Int32>(IntPtr.Zero);
+                        break;
+                }
+                return pointer;
             }
-            return pointer;
         }
 
-        public Pointer<UInt32> AudioStatusPtr()
+        public Pointer<UInt32> AliceIDPtr
         {
-            Pointer<UInt32> pointer;
-            switch (this.GameVersion)
+            get
             {
-                case GameVersion.Steam:
-                    pointer = new Pointer<UInt32>(this.Process.MainModule.BaseAddress, 0x44B8A8, 0x1C, 0xC, 0x0, 0x4, 0x16C);
-                    break;
-                case GameVersion.DolphinPAL:
-                    pointer = new Pointer<UInt32>(this.Mem1, 0x7FCA10);
-                    break;
-                case GameVersion.DolphinNTSC:
-                    pointer = new Pointer<UInt32>(IntPtr.Zero); // TODO: Find this
-                    break;
-                case GameVersion.Invalid:
-                default:
-                    pointer = new Pointer<UInt32>(IntPtr.Zero);
-                    break;
+                Pointer<UInt32> pointer;
+                switch (this.GameVersion)
+                {
+                    case GameVersion.Steam:
+                        pointer = new Pointer<UInt32>(this.Process.MainModule.BaseAddress, 0x44B8A8, 0x8C, 0x8, 0x28, 0x9D0);
+                        break;
+                    case GameVersion.DolphinPAL:
+                        pointer = new Pointer<UInt32>(this.Mem1, 0x7DE5D4, 0x9D0);
+                        break;
+                    case GameVersion.DolphinNTSC:
+                        pointer = new Pointer<UInt32>(IntPtr.Zero); // TODO: Find this
+                        break;
+                    case GameVersion.Invalid:
+                    default:
+                        pointer = new Pointer<UInt32>(IntPtr.Zero);
+                        break;
+                }
+                return pointer;
             }
-            return pointer;
         }
 
-        public Pointer<UInt32> BandersnatchPhasePtr()
+        public Pointer<UInt32> AudioStatusPtr
         {
-            Pointer<UInt32> pointer;
-            switch (this.GameVersion)
+            get
             {
-                case GameVersion.Steam:
-                    pointer = new Pointer<UInt32>(this.Process.MainModule.BaseAddress, 0x44B8A8, 0x90, 0x54, 0x15C, 0x1C);
-                    break;
-                case GameVersion.DolphinPAL:
-                    pointer = new Pointer<UInt32>(this.Mem1, 0x7DA380);
-                    break;
-                case GameVersion.DolphinNTSC:
-                    pointer = new Pointer<UInt32>(IntPtr.Zero); // TODO: Find this
-                    break;
-                case GameVersion.Invalid:
-                default:
-                    pointer = new Pointer<UInt32>(IntPtr.Zero);
-                    break;
+                Pointer<UInt32> pointer;
+                switch (this.GameVersion)
+                {
+                    case GameVersion.Steam:
+                        pointer = new Pointer<UInt32>(this.Process.MainModule.BaseAddress, 0x44B8A8, 0x1C, 0xC, 0x0, 0x4, 0x16C);
+                        break;
+                    case GameVersion.DolphinPAL:
+                        pointer = new Pointer<UInt32>(this.Mem1, 0x7FCA10);
+                        break;
+                    case GameVersion.DolphinNTSC:
+                        pointer = new Pointer<UInt32>(IntPtr.Zero); // TODO: Find this
+                        break;
+                    case GameVersion.Invalid:
+                    default:
+                        pointer = new Pointer<UInt32>(IntPtr.Zero);
+                        break;
+                }
+                return pointer;
             }
-            return pointer;
         }
 
-        public Pointer<Single> StayneHealthPtr()
+        public Pointer<UInt32> BandersnatchPhasePtr
         {
-            Pointer<Single> pointer;
-            switch (this.GameVersion)
+            get
             {
-                case GameVersion.Steam:
-                    pointer = new Pointer<Single>(this.Process.MainModule.BaseAddress, 0x44B8A8, 0x8C, 0x4, 0x58, 0x3D0);
-                    break;
-                case GameVersion.DolphinPAL:
-                    pointer = new Pointer<Single>(this.Mem1, 0x6F4FE4, 0x4F8);
-                    break;
-                case GameVersion.DolphinNTSC:
-                    pointer = new Pointer<Single>(IntPtr.Zero); // TODO: Find this
-                    break;
-                case GameVersion.Invalid:
-                default:
-                    pointer = new Pointer<Single>(IntPtr.Zero);
-                    break;
+                Pointer<UInt32> pointer;
+                switch (this.GameVersion)
+                {
+                    case GameVersion.Steam:
+                        pointer = new Pointer<UInt32>(this.Process.MainModule.BaseAddress, 0x44B8A8, 0x90, 0x54, 0x15C, 0x1C);
+                        break;
+                    case GameVersion.DolphinPAL:
+                        pointer = new Pointer<UInt32>(this.Mem1, 0x7DA380);
+                        break;
+                    case GameVersion.DolphinNTSC:
+                        pointer = new Pointer<UInt32>(IntPtr.Zero); // TODO: Find this
+                        break;
+                    case GameVersion.Invalid:
+                    default:
+                        pointer = new Pointer<UInt32>(IntPtr.Zero);
+                        break;
+                }
+                return pointer;
             }
-            return pointer;
         }
 
-        public Pointer<UInt32> JabberwockyPhasePtr()
+        public Pointer<Single> StayneHealthPtr
         {
-            Pointer<UInt32> pointer;
-            switch (this.GameVersion)
+            get
             {
-                case GameVersion.Steam:
-                    pointer = new Pointer<UInt32>(this.Process.MainModule.BaseAddress, 0x44B8A8, 0x9C, 0xC, 0x1C, 0x4);
-                    break;
-                case GameVersion.DolphinPAL:
-                    pointer = new Pointer<UInt32>(this.Mem1, 0x7762EC, 0x1C, 0x4);
-                    break;
-                case GameVersion.DolphinNTSC:
-                    pointer = new Pointer<UInt32>(IntPtr.Zero); // TODO: Find this
-                    break;
-                case GameVersion.Invalid:
-                default:
-                    pointer = new Pointer<UInt32>(IntPtr.Zero);
-                    break;
+                Pointer<Single> pointer;
+                switch (this.GameVersion)
+                {
+                    case GameVersion.Steam:
+                        pointer = new Pointer<Single>(this.Process.MainModule.BaseAddress, 0x44B8A8, 0x8C, 0x4, 0x58, 0x3D0);
+                        break;
+                    case GameVersion.DolphinPAL:
+                        pointer = new Pointer<Single>(this.Mem1, 0x6F4FE4, 0x4F8);
+                        break;
+                    case GameVersion.DolphinNTSC:
+                        pointer = new Pointer<Single>(IntPtr.Zero); // TODO: Find this
+                        break;
+                    case GameVersion.Invalid:
+                    default:
+                        pointer = new Pointer<Single>(IntPtr.Zero);
+                        break;
+                }
+                return pointer;
             }
-            return pointer;
+        }
+
+        public Pointer<UInt32> JabberwockyPhasePtr
+        {
+            get
+            {
+                Pointer<UInt32> pointer;
+                switch (this.GameVersion)
+                {
+                    case GameVersion.Steam:
+                        pointer = new Pointer<UInt32>(this.Process.MainModule.BaseAddress, 0x44B8A8, 0x9C, 0xC, 0x1C, 0x4);
+                        break;
+                    case GameVersion.DolphinPAL:
+                        pointer = new Pointer<UInt32>(this.Mem1, 0x5f48d8, 0x9C, 0xC, 0x1C, 0x4);
+                        break;
+                    case GameVersion.DolphinNTSC:
+                        pointer = new Pointer<UInt32>(IntPtr.Zero); // TODO: Find this
+                        break;
+                    case GameVersion.Invalid:
+                    default:
+                        pointer = new Pointer<UInt32>(IntPtr.Zero);
+                        break;
+                }
+                return pointer;
+            }
+        }
+
+        public Pointer<UInt32> JabberwockyPhase4CounterPtr
+        {
+            get
+            {
+                Pointer<UInt32> pointer;
+                switch (this.GameVersion)
+                {
+                    case GameVersion.Steam:
+                        pointer = new Pointer<UInt32>(this.Process.MainModule.BaseAddress, 0x44B8A8, 0x9C, 0xC, 0xC, 0x4);
+                        break;
+                    case GameVersion.DolphinPAL:
+                        pointer = new Pointer<UInt32>(this.Mem1, 0x5f48d8, 0x9C, 0xC, 0xC, 0x4);
+                        break;
+                    case GameVersion.DolphinNTSC:
+                        pointer = new Pointer<UInt32>(IntPtr.Zero); // TODO: Find this
+                        break;
+                    case GameVersion.Invalid:
+                    default:
+                        pointer = new Pointer<UInt32>(IntPtr.Zero);
+                        break;
+                }
+                return pointer;
+            }
         }
     }
 }

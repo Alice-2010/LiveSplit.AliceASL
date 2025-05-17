@@ -8,7 +8,7 @@ namespace LiveSplit.AliceASL.Memory
     public enum GameVersion: int
     {
         Invalid = -1,
-        // DVDROM,
+        DVDROM,
         Steam,
         DolphinPAL,
         DolphinNTSC
@@ -102,14 +102,15 @@ namespace LiveSplit.AliceASL.Memory
         private void PopulatePointers()
         {
             this.Pointers.Clear();
-            this.Pointers.Add("MapID", this.Addresses.MapIDPtr());
-            this.Pointers.Add("MapSector", this.Addresses.MapSectorPtr());
-            this.Pointers.Add("AudioStatus", this.Addresses.AudioStatusPtr());
-            this.Pointers.Add("GameTime", this.Addresses.GameTimePtr());
-            this.Pointers.Add("AliceID", this.Addresses.AliceIDPtr());
-            this.Pointers.Add("BandersnatchPhase", this.Addresses.BandersnatchPhasePtr());
-            this.Pointers.Add("StayneHealth", this.Addresses.StayneHealthPtr());
-            this.Pointers.Add("JabberwockyPhase", this.Addresses.JabberwockyPhasePtr());
+            this.Pointers.Add("MapID", this.Addresses.MapIDPtr);
+            this.Pointers.Add("MapSector", this.Addresses.MapSectorPtr);
+            this.Pointers.Add("AudioStatus", this.Addresses.AudioStatusPtr);
+            this.Pointers.Add("GameTime", this.Addresses.GameTimePtr);
+            this.Pointers.Add("AliceID", this.Addresses.AliceIDPtr);
+            this.Pointers.Add("BandersnatchPhase", this.Addresses.BandersnatchPhasePtr);
+            this.Pointers.Add("StayneHealth", this.Addresses.StayneHealthPtr);
+            this.Pointers.Add("JabberwockyPhase", this.Addresses.JabberwockyPhasePtr);
+            this.Pointers.Add("JabberwockyP4Counter", this.Addresses.JabberwockyPhase4CounterPtr);
         }
 
         public void UpdatePointerValues()
@@ -124,42 +125,25 @@ namespace LiveSplit.AliceASL.Memory
                     case "MapSector":
                         Pointer<int> intPtr = (Pointer<int>)value;
                         int previous = this.CurrentValues.ContainsKey(key) ? (int)this.CurrentValues[key] : default;
-                        if (this.PreviousValues.ContainsKey(key))
-                            this.PreviousValues[key] = previous;
-                        else
-                            this.PreviousValues.Add(key, previous);
-                        if (this.CurrentValues.ContainsKey(key))
-                            this.CurrentValues[key] = intPtr.Read(this.Proc);
-                        else
-                            this.CurrentValues.Add(key, intPtr.Read(this.Proc));
+                        this.PreviousValues[key] = previous;
+                        this.CurrentValues[key] = intPtr.Read(this.Proc);
                         break;
                     case "AliceID":
                     case "BandersnatchPhase":
                     case "JabberwockyPhase":
+                    case "JabberwockyP4Counter":
                     case "AudioStatus":
                         Pointer<uint> uintPtr = (Pointer<uint>)value;
                         uint previousU = this.CurrentValues.ContainsKey(key) ? (uint)this.CurrentValues[key] : default;
-                        if (this.PreviousValues.ContainsKey(key))
-                            this.PreviousValues[key] = previousU;
-                        else
-                            this.PreviousValues.Add(key, previousU);
-                        if (this.CurrentValues.ContainsKey(key))
-                            this.CurrentValues[key] = uintPtr.Read(this.Proc);
-                        else
-                            this.CurrentValues.Add(key, uintPtr.Read(this.Proc));
+                        this.PreviousValues[key] = previousU;
+                        this.CurrentValues[key] = uintPtr.Read(this.Proc);
                         break;
                     case "GameTime":
                     case "StayneHealth":
                         Pointer<float> floatPtr = (Pointer<float>)value;
                         float previousF = this.CurrentValues.ContainsKey(key) ? (float)this.CurrentValues[key] : default;
-                        if (this.PreviousValues.ContainsKey(key))
-                            this.PreviousValues[key] = previousF;
-                        else
-                            this.PreviousValues.Add(key, previousF);
-                        if (this.CurrentValues.ContainsKey(key))
-                            this.CurrentValues[key] = floatPtr.Read(this.Proc);
-                        else
-                            this.CurrentValues.Add(key, floatPtr.Read(this.Proc));
+                        this.PreviousValues[key] = previousF;
+                        this.CurrentValues[key] = floatPtr.Read(this.Proc);
                         break;
                     default:
                         break;

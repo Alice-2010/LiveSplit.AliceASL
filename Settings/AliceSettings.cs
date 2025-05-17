@@ -51,6 +51,8 @@ namespace LiveSplit.AliceASL.Settings
             {
                 case GameVersion.Steam:
                     return "PC Steam";
+                case GameVersion.DVDROM:
+                    return "PC DVDROM";
                 case GameVersion.DolphinPAL:
                     return "Dolphin PAL";
                 case GameVersion.DolphinNTSC:
@@ -180,7 +182,7 @@ namespace LiveSplit.AliceASL.Settings
 
         private void LoadSplits()
         {
-            List<AliceSplit> splits = new List<AliceSplit>
+            this.Settings = new List<AliceSplit>
             {
                 // Utility
                 new AliceSplit("start", "Start", "Auto Start the timer", "Utility", true),
@@ -226,13 +228,12 @@ namespace LiveSplit.AliceASL.Settings
                 // new AliceSplit("wq", "Visit White Queen", "Split on visiting the White Queen", "Marmoreal", true),
 
                 // LVL100 Frabjous Day
-                new AliceSplit("jabber0", "Jabberwocky Start (Full Game run only)", "Split on Jabberwocky Start", "Frabjous Day/Jabberwocky", true),
+                new AliceSplit("jabber0", "Jabberwocky Start", "Split on Jabberwocky Start (Full Game run only)", "Frabjous Day/Jabberwocky", true),
                 new AliceSplit("jabber1", "Jabberwocky 1", "Split on end of Jabberwocky phase 1", "Frabjous Day/Jabberwocky", false),
                 new AliceSplit("jabber2", "Jabberwocky 2", "Split on end of Jabberwocky phase 2", "Frabjous Day/Jabberwocky", false),
                 new AliceSplit("jabber3", "Jabberwocky 3", "Split on end of Jabberwocky phase 3", "Frabjous Day/Jabberwocky", false),
                 new AliceSplit("jabber4", "Jabberwocky 4", "Split on end of Jabberwocky phase 4", "Frabjous Day/Jabberwocky", true)
             };
-            this.Settings = splits;
         }
 
         public AliceSplit this[string splitID]
