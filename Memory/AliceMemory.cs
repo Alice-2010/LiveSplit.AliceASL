@@ -111,6 +111,8 @@ namespace LiveSplit.AliceASL.Memory
             this.Pointers.Add("StayneHealth", this.Addresses.StayneHealthPtr);
             this.Pointers.Add("JabberwockyPhase", this.Addresses.JabberwockyPhasePtr);
             this.Pointers.Add("JabberwockyP4Counter", this.Addresses.JabberwockyPhase4CounterPtr);
+            this.Pointers.Add("UnlockedMarchHare", this.Addresses.UnlockedMarchHarePtr);
+            this.Pointers.Add("UnlockedHatter", this.Addresses.UnlockedHatterPtr);
         }
 
         public void UpdatePointerValues()
@@ -123,27 +125,26 @@ namespace LiveSplit.AliceASL.Memory
                 {
                     case "MapID":
                     case "MapSector":
-                        Pointer<int> intPtr = (Pointer<int>)value;
-                        int previous = this.CurrentValues.ContainsKey(key) ? (int)this.CurrentValues[key] : default;
-                        this.PreviousValues[key] = previous;
-                        this.CurrentValues[key] = intPtr.Read(this.Proc);
+                        this.PreviousValues[key] = this.CurrentValues.ContainsKey(key) ? (int)this.CurrentValues[key] : default;
+                        this.CurrentValues[key] = ((Pointer<int>)value).Read(this.Proc);
                         break;
                     case "AliceID":
                     case "BandersnatchPhase":
                     case "JabberwockyPhase":
                     case "JabberwockyP4Counter":
                     case "AudioStatus":
-                        Pointer<uint> uintPtr = (Pointer<uint>)value;
-                        uint previousU = this.CurrentValues.ContainsKey(key) ? (uint)this.CurrentValues[key] : default;
-                        this.PreviousValues[key] = previousU;
-                        this.CurrentValues[key] = uintPtr.Read(this.Proc);
+                        this.PreviousValues[key] = this.CurrentValues.ContainsKey(key) ? (uint)this.CurrentValues[key] : default;
+                        this.CurrentValues[key] = ((Pointer<uint>)value).Read(this.Proc);
                         break;
                     case "GameTime":
                     case "StayneHealth":
-                        Pointer<float> floatPtr = (Pointer<float>)value;
-                        float previousF = this.CurrentValues.ContainsKey(key) ? (float)this.CurrentValues[key] : default;
-                        this.PreviousValues[key] = previousF;
-                        this.CurrentValues[key] = floatPtr.Read(this.Proc);
+                        this.PreviousValues[key] = this.CurrentValues.ContainsKey(key) ? (float)this.CurrentValues[key] : default;
+                        this.CurrentValues[key] = ((Pointer<float>)value).Read(this.Proc);
+                        break;
+                    case "UnlockedMarchHare":
+                    case "UnlockedHatter":
+                        this.PreviousValues[key] = this.CurrentValues.ContainsKey(key) ? (bool)this.CurrentValues[key] : default;
+                        this.CurrentValues[key] = ((Pointer<bool>)value).Read(this.Proc);
                         break;
                     default:
                         break;

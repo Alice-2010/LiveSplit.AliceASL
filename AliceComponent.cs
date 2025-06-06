@@ -66,10 +66,18 @@ namespace LiveSplit.AliceASL
             float stayneHealthCurrent = Convert.ToSingle(values["StayneHealth"]);
             uint jabberwockyPhaseCurrent = Convert.ToUInt32(values["JabberwockyPhase"]);
             uint jabberwockyPhase4CounterCurrent = Convert.ToUInt32(values["JabberwockyP4Counter"]);
+            bool unlockedMarchHareCurrent = Convert.ToBoolean(values["UnlockedMarchHare"]);
+            bool unlockedHatterCurrent = Convert.ToBoolean(values["UnlockedHatter"]);
 
             // pause LRT if game is loading
             if (this.Settings["lrt"].Enabled)
-                state.IsGameTimePaused = mapIDCurrent == -1;
+            {
+                this.Timer.CurrentState.IsGameTimePaused = mapIDCurrent == -1;
+                if (this.Timer.CurrentState.IsGameTimePaused)
+                    this.WriteLog("Game Time Paused: Loading");
+                else
+                    this.WriteLog("Game Time Resumed: Loading");
+            }
 
             // if map is changed
             if (mapIDCurrent != mapIDPrevious)
@@ -82,7 +90,7 @@ namespace LiveSplit.AliceASL
                     this.WriteLog($"Changed sector from {mapSectorPrevious} to {mapSectorCurrent} (map {mapIDCurrent})");
 
                 // display game time in layout
-                if (this.Settings["igt"].Enabled)
+                if (this.Settings["igt"].Enabled && this.Timer.CurrentState.CurrentPhase == TimerPhase.Running)
                     this.SetTextComponent("Game Time", TimeSpan.FromSeconds(gameTimeCurrent).ToString(@"hh\:mm\:ss\.fff"));
 
                 // TODO: Track Achievements + display on layout (depending on settings)
@@ -189,13 +197,19 @@ namespace LiveSplit.AliceASL
                             return;
                         }
 
-                        if (!this.SplitsDone.Contains("gardenPishsalver") && aliceIDCurrent == 4 && aliceIDPrevious == 5)
+                        if (this.SplitsDone.Contains("gardenCake") && !this.SplitsDone.Contains("gardenPishsalver") && aliceIDCurrent == 4 && aliceIDPrevious == 5)
                         {
                             this.Split("gardenPishsalver");
                             return;
                         }
 
-                        if (this.SplitsDone.Contains("gardenCake") && !this.SplitsDone.Contains("bander0") && audioStatusCurrent == 1 && audioStatusPrevious == 4 && bandersnatchPhaseCurrent == 3)
+                        if (this.SplitsDone.Contains("gardenPishsalver") && !this.SplitsDone.Contains("unlockHare") && unlockedMarchHareCurrent)
+                        {
+                            this.Split("unlockHare");
+                            return;
+                        }
+
+                        if (this.SplitsDone.Contains("unlockHare") && !this.SplitsDone.Contains("bander0") && audioStatusCurrent == 1 && audioStatusPrevious == 4 && bandersnatchPhaseCurrent == 3)
                         {
                             this.Split("bander0");
                             return;
@@ -229,7 +243,11 @@ namespace LiveSplit.AliceASL
                     // LVL040 March Hare House
                     if (mapIDCurrent == 40)
                     {
-
+                        if (this.SplitsDone.Contains("bander3") && !this.SplitsDone.Contains("unlockHatter") && unlockedHatterCurrent)
+                        {
+                            this.Split("unlockHatter");
+                            return;
+                        }
                     }
 
                     // LVL050 Hightopps
@@ -263,11 +281,11 @@ namespace LiveSplit.AliceASL
                     // LVL080 Salazen Grum
                     if (mapIDCurrent == 80)
                     {
-                        //if (!this.SplitsDone.Contains("sgPishsalver") && aliceIDCurrent == 5 && aliceIDPrevious == 4)
-                        //{
-                        //    this.Split("sgPishsalver");
-                        //    return;
-                        //}
+                        if (!this.SplitsDone.Contains("sgPishsalver") && aliceIDCurrent == 5 && aliceIDPrevious == 4)
+                        {
+                            this.Split("sgPishsalver");
+                            return;
+                        }
                     }
 
                     // LVL085 Bandersnatch Stables
@@ -377,6 +395,7 @@ namespace LiveSplit.AliceASL
             // remove the last split from the list
             // this will allow the ASL to resplit if a false positive happens and the user undoes the split
             this.SplitsDone.RemoveAt(this.SplitsDone.Count - 1);
+            this.WriteLog("Undoing last split");
         }
 
         private void SetTextComponent(string id, string text)

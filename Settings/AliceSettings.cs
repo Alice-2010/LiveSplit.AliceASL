@@ -196,6 +196,7 @@ namespace LiveSplit.AliceASL.Settings
                 // LVL020 Strange Garden
                 new AliceSplit("gardenCake", "Cake", "Split on Garden Cake", "Strange Garden", true),
                 new AliceSplit("gardenPishsalver", "Pishsalver", "Split on Garden Pishsalver", "Strange Garden", true),
+                new AliceSplit("unlockHare", "March Hare", "Find the March Hare", "Strange Garden", false),
                 new AliceSplit("bander0", "Bandersnatch Start", "Split on Bandersnatch Start (Full Game run only)", "Strange Garden/Bandersnatch", false),
                 new AliceSplit("bander1", "Bandersnatch Phase 1", "Split on end of Bandersnatch phase 1", "Strange Garden/Bandersnatch", false),
                 new AliceSplit("bander2", "Bandersnatch Phase 2", "Split on end of Bandersnatch phase 2", "Strange Garden/Bandersnatch", false),
@@ -204,6 +205,7 @@ namespace LiveSplit.AliceASL.Settings
                 // LVL030 Tulgey Woods
 
                 // LVL040 March Hare House
+                new AliceSplit("unlockHatter", "Mad Hatter", "Find the Mad Hatter", "March Hare House", true),
 
                 // LVL050 Hightopps
 
@@ -215,7 +217,7 @@ namespace LiveSplit.AliceASL.Settings
                 // LVL075 Moat
 
                 // LVL080 Salazen Grum
-                // new AliceSplit("sgPishsalver", "Pishsalver", "Split on Pishsalver", "Salazen Grum", true),
+                new AliceSplit("sgPishsalver", "Pishsalver", "Split on Pishsalver", "Salazen Grum", true),
 
                 // LVL085 Bandersnatch Stables
                 new AliceSplit("stayne0", "Stayne Start", "Split on Stayne Start (Full Game run only)", "Bandersnatch Stables/Stayne", false),
