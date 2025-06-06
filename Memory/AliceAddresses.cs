@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LiveSplit.ComponentUtil;
+using System;
 using System.Diagnostics;
 
 namespace LiveSplit.AliceASL.Memory
@@ -17,6 +18,21 @@ namespace LiveSplit.AliceASL.Memory
         public T Read(Process process)
         {
             return process.Read<T>(this.BaseAddress, this.Offsets);
+        }
+
+        public void Write(Process process, T value)
+        {
+            IntPtr addr = this.BaseAddress;
+            if (this.Offsets.Length > 0)
+            {
+                if (this.Offsets.Length > 1)
+                {
+                    for (int index = 0; index < this.Offsets.Length - 1; index++)
+                        process.ReadPointer(addr + this.Offsets[index], out addr);
+                }
+                addr += this.Offsets[0];
+            }
+            process.WriteValue<T>(addr, value);
         }
     };
 

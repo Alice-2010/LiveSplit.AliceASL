@@ -319,11 +319,11 @@ namespace LiveSplit.AliceASL
                     // LVL090 Marmoreal
                     if (mapIDCurrent == 90)
                     {
-                        //if (this.SplitsDone.Contains("stayne3") && !this.SplitsDone.Contains("wq") && aliceIDCurrent == 5 && aliceIDPrevious == 4)
-                        //{
-                        //    this.Split("wq");
-                        //    return;
-                        //}
+                        if (this.SplitsDone.Contains("stayne3") && !this.SplitsDone.Contains("wq") && aliceIDCurrent == 5 && aliceIDPrevious == 4)
+                        {
+                            this.Split("wq");
+                            return;
+                        }
                     }
 
                     // LVL100 Frabjous Day
@@ -359,6 +359,13 @@ namespace LiveSplit.AliceASL
                             return;
                         }
                     }
+                }
+
+                // Bugfixes
+                // If white queen has been visited but Alice is small, then set Alice to normal size
+                if (this.Settings["wqSmallAliceBug"].Enabled && this.SplitsDone.Contains("wq") && aliceIDCurrent == 4)
+                {
+                    ((Pointer<UInt32>)this.Memory.Pointers["AliceID"]).Write(this.Memory.Proc, 5);
                 }
             }
         }

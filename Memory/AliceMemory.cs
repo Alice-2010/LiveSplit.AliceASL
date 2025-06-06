@@ -20,7 +20,7 @@ namespace LiveSplit.AliceASL.Memory
         public IntPtr Mem2 { get; private set; } = IntPtr.Zero;
         public Process Proc { get; private set; }
         private AliceAddresses Addresses { get; set; }
-        private Dictionary<string, object> Pointers { get; set; } = new Dictionary<string, object>();
+        internal Dictionary<string, object> Pointers { get; set; } = new Dictionary<string, object>();
         public Dictionary<string, object> PreviousValues { get; private set; } = new Dictionary<string, object>();
         public Dictionary<string, object> CurrentValues { get; private set; } = new Dictionary<string, object>();
         public GameVersion Version { get; private set; } = GameVersion.Invalid;
@@ -36,6 +36,7 @@ namespace LiveSplit.AliceASL.Memory
         {
             this.Mem1 = IntPtr.Zero;
             this.Mem2 = IntPtr.Zero;
+            this.Addresses = null;
             this.IsHooked = this.Proc != null && !this.Proc.HasExited;
             if (!this.IsHooked && DateTime.Now > this.lastHooked.AddSeconds(1))
             {
@@ -90,7 +91,6 @@ namespace LiveSplit.AliceASL.Memory
                     }
                 }
             }
-            this.Addresses = null;
             if (this.IsHooked)
             {
                 this.Addresses = new AliceAddresses(this.Proc, this.Version, this.Mem1);

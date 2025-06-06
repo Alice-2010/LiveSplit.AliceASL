@@ -192,11 +192,12 @@ namespace LiveSplit.AliceASL.Settings
                 new AliceSplit("lrt", "Load Removal", "Remove load times from the timer", "Utility", true),
                 new AliceSplit("igt", "Game Time", "Display In Game Time in LiveSplit Layout (CAUTION: May cause lag to LiveSplit)", "Utility", false),
                 new AliceSplit("il", "Boss Level", "Enable when running an Individual Level run", "Utility", false),
+                new AliceSplit("wqSmallAliceBug", "White Queen Small Alice Bug", "Enable to fix the Small Alice after White Queen bug", "Utility/Bigfixes", false),
 
                 // LVL020 Strange Garden
                 new AliceSplit("gardenCake", "Cake", "Split on Garden Cake", "Strange Garden", true),
                 new AliceSplit("gardenPishsalver", "Pishsalver", "Split on Garden Pishsalver", "Strange Garden", true),
-                new AliceSplit("unlockHare", "March Hare", "Find the March Hare", "Strange Garden", false),
+                new AliceSplit("unlockHare", "March Hare", "Split on finding the March Hare", "Strange Garden", false),
                 new AliceSplit("bander0", "Bandersnatch Start", "Split on Bandersnatch Start (Full Game run only)", "Strange Garden/Bandersnatch", false),
                 new AliceSplit("bander1", "Bandersnatch Phase 1", "Split on end of Bandersnatch phase 1", "Strange Garden/Bandersnatch", false),
                 new AliceSplit("bander2", "Bandersnatch Phase 2", "Split on end of Bandersnatch phase 2", "Strange Garden/Bandersnatch", false),
@@ -205,7 +206,7 @@ namespace LiveSplit.AliceASL.Settings
                 // LVL030 Tulgey Woods
 
                 // LVL040 March Hare House
-                new AliceSplit("unlockHatter", "Mad Hatter", "Find the Mad Hatter", "March Hare House", true),
+                new AliceSplit("unlockHatter", "Mad Hatter", "Split on finding the Mad Hatter", "March Hare House", true),
 
                 // LVL050 Hightopps
 
@@ -226,8 +227,7 @@ namespace LiveSplit.AliceASL.Settings
                 new AliceSplit("stayne3", "Stayne Phase 3", "Split on end of Stayne phase 3", "Bandersnatch Stables/Stayne", true),
 
                 // LVL090 Marmoreal
-                // TODO: If the bug where Alice stays small happens, do we want to check for and update this?
-                // new AliceSplit("wq", "Visit White Queen", "Split on visiting the White Queen", "Marmoreal", true),
+                new AliceSplit("wq", "Visit White Queen", "Split on visiting the White Queen", "Marmoreal", true),
 
                 // LVL100 Frabjous Day
                 new AliceSplit("jabber0", "Jabberwocky Start", "Split on Jabberwocky Start (Full Game run only)", "Frabjous Day/Jabberwocky", true),
