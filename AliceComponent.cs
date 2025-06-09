@@ -10,8 +10,6 @@ using LiveSplit.AliceASL.Settings;
 using LiveSplit.AliceASL.Memory;
 using System.IO;
 using System.Diagnostics;
-using System.Linq;
-using System.Reflection;
 
 namespace LiveSplit.AliceASL
 {
@@ -37,7 +35,10 @@ namespace LiveSplit.AliceASL
                 this.Timer = new TimerModel { CurrentState = state };
                 this.Timer.CurrentState.OnStart += this.OnStart;
                 this.Timer.CurrentState.OnReset += this.OnReset;
-                this.Timer.CurrentState.OnUndoSplit += this.OnUndoSplit;
+                //this.Timer.CurrentState.OnUndoSplit += this.OnUndoSplit;
+                this.Timer.CurrentState.OnPause += (sender, e) => this.WriteLog("Timer Paused");
+                this.Timer.CurrentState.OnResume += (sender, e) => this.WriteLog("Timer Resumed");
+                this.Timer.CurrentState.OnSkipSplit += (sender, e) => this.WriteLog("Timer Skipped Split");
             }
         }
 
@@ -76,9 +77,10 @@ namespace LiveSplit.AliceASL
 
             if (state.CurrentPhase == TimerPhase.Running)
             {
-                // pause LRT if game is loading
-                if (this.Settings["lrt"].Enabled)
+                if (state.CurrentTimingMethod == TimingMethod.GameTime)
                 {
+                    this.Timer.CurrentState.SetGameTime(TimeSpan.FromSeconds(gameTimeCurrent));
+                    // pause LRT if game is loading
                     bool prevPaused = this.Timer.CurrentState.IsGameTimePaused;
                     this.Timer.CurrentState.IsGameTimePaused = mapIDCurrent == -1;
                     if (this.Timer.CurrentState.IsGameTimePaused != prevPaused && !prevPaused)
@@ -96,10 +98,6 @@ namespace LiveSplit.AliceASL
                 {
                     if (mapSectorCurrent != mapSectorPrevious)
                         this.WriteLog($"Changed sector from {mapSectorPrevious} to {mapSectorCurrent} (map {mapIDCurrent})");
-
-                    // display game time in layout
-                    if (this.Settings["igt"].Enabled)
-                        this.SetTextComponent("Game Time", TimeSpan.FromSeconds(gameTimeCurrent).ToString(@"hh\:mm\:ss\.fff"));
 
                     // TODO: Track Achievements + display on layout (depending on settings)
                 }
@@ -141,13 +139,13 @@ namespace LiveSplit.AliceASL
                 else
                 {
                     // full game run
-                    if (mapIDCurrent == 10 && audioStatusCurrent == 1 && audioStatusPrevious == 4)
-                    {
-                        // Clear the log file
-                        this.WriteLog("Beginning Full Game Run", false);
-                        this.Timer.Start();
-                        return;
-                    }
+                    //if (mapIDCurrent == 10 && audioStatusCurrent == 1 && audioStatusPrevious == 4)
+                    //{
+                    //    // Clear the log file
+                    //    this.WriteLog("Beginning Full Game Run", false);
+                    //    this.Timer.Start();
+                    //    return;
+                    //}
                 }
             }
 
@@ -157,39 +155,39 @@ namespace LiveSplit.AliceASL
                 if (this.Settings["il"].Enabled)
                 {
                     // TODO: find better addresses for ILs - maybe video number?
-                    //// bandersnatch
-                    //if (mapIDCurrent == 20 && audioStatusCurrent == 4 && mapSectorCurrent == 3)
-                    //{
-                    //    this.WriteLog("Starting New Bandersnatch Run - Resetting");
-                    //    this.Timer.Reset();
-                    //    return;
-                    //}
+                    // bandersnatch
+                    if (mapIDCurrent == 20 && audioStatusCurrent == 4 && mapSectorCurrent == 3)
+                    {
+                        this.WriteLog("Starting New Bandersnatch Run - Resetting");
+                        this.Timer.Reset();
+                        return;
+                    }
 
-                    //// stayne
-                    //if (mapIDCurrent == 85 && audioStatusCurrent == 4)
-                    //{
-                    //    this.WriteLog("Starting New Stayne Run - Resetting");
-                    //    this.Timer.Reset();
-                    //    return;
-                    //}
+                    // stayne
+                    if (mapIDCurrent == 85 && audioStatusCurrent == 4)
+                    {
+                        this.WriteLog("Starting New Stayne Run - Resetting");
+                        this.Timer.Reset();
+                        return;
+                    }
 
-                    //// jabberwocky
-                    //if (mapIDCurrent == 100 && audioStatusCurrent == 4 && mapSectorCurrent == 2)
-                    //{
-                    //    this.WriteLog("Starting New Jabberwocky Run - Resetting");
-                    //    this.Timer.Reset();
-                    //    return;
-                    //}
+                    // jabberwocky
+                    if (mapIDCurrent == 100 && audioStatusCurrent == 4 && mapSectorCurrent == 2)
+                    {
+                        this.WriteLog("Starting New Jabberwocky Run - Resetting");
+                        this.Timer.Reset();
+                        return;
+                    }
                 }
                 else
                 {
-                    //// full game run
-                    //if (mapIDCurrent == 10 && audioStatusCurrent == 4)
-                    //{
-                    //    this.WriteLog("Starting New Full Game Run - Resetting");
-                    //    this.Timer.Reset();
-                    //    return;
-                    //}
+                    // full game run
+                    if (mapIDCurrent == 10 && audioStatusCurrent == 4)
+                    {
+                        this.WriteLog("Starting New Full Game Run - Resetting");
+                        this.Timer.Reset();
+                        return;
+                    }
                 }
             }
 
@@ -199,7 +197,13 @@ namespace LiveSplit.AliceASL
                 // LVL020 Strange Garden
                 if (mapIDCurrent == 20)
                 {
-                    if (!this.SplitsDone.Contains("gardenCake") && aliceIDCurrent == 5 && aliceIDPrevious == 4)
+                    if (!this.SplitsDone.Contains("findAlice") && audioStatusCurrent == 1 && audioStatusPrevious == 4)
+                    {
+                        this.Split("findAlice");
+                        return;
+                    }
+
+                    if (this.SplitsDone.Contains("findAlice") && !this.SplitsDone.Contains("gardenCake") && aliceIDCurrent == 5 && aliceIDPrevious == 4)
                     {
                         this.Split("gardenCake");
                         return;
@@ -211,7 +215,13 @@ namespace LiveSplit.AliceASL
                         return;
                     }
 
-                    if (this.SplitsDone.Contains("gardenPishsalver") && !this.SplitsDone.Contains("bander0") && audioStatusCurrent == 1 && audioStatusPrevious == 4 && bandersnatchPhaseCurrent == 3)
+                    if (this.SplitsDone.Contains("gardenPishsalver") && !this.SplitsDone.Contains("unlockHare") && audioStatusCurrent == 1 && audioStatusPrevious == 4 && bandersnatchPhaseCurrent == 3)
+                    {
+                        this.Split("unlockHare");
+                        return;
+                    }
+
+                    if (this.SplitsDone.Contains("unlockHare") && !this.SplitsDone.Contains("bander0") && audioStatusCurrent == 1 && audioStatusPrevious == 4 && bandersnatchPhaseCurrent == 3)
                     {
                         this.Split("bander0");
                         return;
@@ -279,7 +289,13 @@ namespace LiveSplit.AliceASL
                 // LVL080 Salazen Grum
                 if (mapIDCurrent == 80)
                 {
-                    if (!this.SplitsDone.Contains("sgPishsalver") && aliceIDCurrent == 5 && aliceIDPrevious == 4)
+                    if (!this.SplitsDone.Contains("sgStart") && aliceIDCurrent == 5 && aliceIDPrevious == 4)
+                    {
+                        this.Split("sgStart");
+                        return;
+                    }
+
+                    if (this.SplitsDone.Contains("sgStart") && !this.SplitsDone.Contains("sgPishsalver") && aliceIDCurrent == 4 && aliceIDPrevious == 5)
                     {
                         this.Split("sgPishsalver");
                         return;
@@ -360,10 +376,11 @@ namespace LiveSplit.AliceASL
 
                 // Bugfixes
                 // If white queen has been visited but Alice is small, then set Alice to normal size
-                if (this.Settings["wqSmallAliceBug"].Enabled && this.SplitsDone.Contains("wq") && aliceIDCurrent == 4)
-                {
-                    ((Pointer<UInt32>)this.Memory.Pointers["AliceID"]).Write(this.Memory.Proc, 5);
-                }
+                // TODO: This won't work due to conflicting conditions to split `wq` if she stays small
+                //if (this.Settings["wqSmallAliceBug"].Enabled && this.SplitsDone.Contains("wq") && aliceIDCurrent == 4)
+                //{
+                //    ((Pointer<UInt32>)this.Memory.Pointers["AliceID"]).Write(this.Memory.Proc, 5);
+                //}
             }
         }
 
@@ -388,36 +405,39 @@ namespace LiveSplit.AliceASL
                 this.WriteLog("Mem1 Base Address: 0x" + this.Memory.Mem1.ToString("X"));
                 this.WriteLog("Mem2 Base Address: 0x" + this.Memory.Mem2.ToString("X"));
             }
+            this.WriteLog("Timer Started");
         }
         private void OnReset(object sender, TimerPhase e)
         {
+            this.WriteLog("Timer Reset");
             this.SplitsDone.Clear();
         }
 
-        private void OnUndoSplit(object sender, EventArgs e)
-        {
+        //private void OnUndoSplit(object sender, EventArgs e)
+        //{
+            // NOTE: This has potential to cause future splits to not split at all if the user undoes a split that was previously done
             // remove the last split from the list
             // this will allow the ASL to resplit if a false positive happens and the user undoes the split
-            this.WriteLog("Undoing last split");
-            this.SplitsDone.RemoveAt(this.SplitsDone.Count - 1);
-        }
+            //this.WriteLog($"Undoing split `{this.SplitsDone[this.SplitsDone.Count-1]}`");
+            //this.SplitsDone.RemoveAt(this.SplitsDone.Count - 1);
+        //}
 
-        private void SetTextComponent(string id, string text)
-        {
-            IEnumerable<object> textSettings = this.Timer.CurrentState.Layout.Components.Where((x) => x.GetType().Name == "TextComponent").Select(x => x.GetType().GetProperty("Settings").GetValue(x, null));
-            object textSetting = textSettings.FirstOrDefault(x => (x.GetType().GetProperty("Text1").GetValue(x, null) as string) == id);
-            if (textSetting == null)
-            {
-                // create the text component if it doesn't exist
-                Assembly textComponentAssembly = Assembly.LoadFrom("Components\\LiveSplit.Text.dll");
-                IComponent textComponent = Activator.CreateInstance(textComponentAssembly.GetType("LiveSplit.UI.Components.TextComponent"), this.Timer.CurrentState) as IComponent;
-                this.Timer.CurrentState.Layout.LayoutComponents.Add(new LayoutComponent("LiveSplit.Text.dll", textComponent));
-                textSetting = textComponent.GetType().GetProperty("Settings", BindingFlags.Instance | BindingFlags.Public).GetValue(textComponent, null);
-                textSetting.GetType().GetProperty("Text1").SetValue(textSetting, id);
-            }
-            // set the text value
-            textSetting?.GetType().GetProperty("Text2").SetValue(textSetting, text);
-        }
+        //private void SetTextComponent(string id, string text)
+        //{
+        //    IEnumerable<object> textSettings = this.Timer.CurrentState.Layout.Components.Where((x) => x.GetType().Name == "TextComponent").Select(x => x.GetType().GetProperty("Settings").GetValue(x, null));
+        //    object textSetting = textSettings.FirstOrDefault(x => (x.GetType().GetProperty("Text1").GetValue(x, null) as string) == id);
+        //    if (textSetting == null)
+        //    {
+        //        // create the text component if it doesn't exist
+        //        Assembly textComponentAssembly = Assembly.LoadFrom("Components\\LiveSplit.Text.dll");
+        //        IComponent textComponent = Activator.CreateInstance(textComponentAssembly.GetType("LiveSplit.UI.Components.TextComponent"), this.Timer.CurrentState) as IComponent;
+        //        this.Timer.CurrentState.Layout.LayoutComponents.Add(new LayoutComponent("LiveSplit.Text.dll", textComponent));
+        //        textSetting = textComponent.GetType().GetProperty("Settings", BindingFlags.Instance | BindingFlags.Public).GetValue(textComponent, null);
+        //        textSetting.GetType().GetProperty("Text1").SetValue(textSetting, id);
+        //    }
+        //    // set the text value
+        //    textSetting?.GetType().GetProperty("Text2").SetValue(textSetting, text);
+        //}
 
         private void WriteLog(string text, bool append = true)
         {

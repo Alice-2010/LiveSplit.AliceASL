@@ -210,14 +210,14 @@ namespace LiveSplit.AliceASL.Settings
                 new AliceSplit("split", "Split", "Auto Split the timer", "Utility", true),
                 new AliceSplit("reset", "Reset", "Auto Reset the timer", "Utility", true),
                 new AliceSplit("log", "Debug Log", "Log debug info to a log file", "Utility", true),
-                new AliceSplit("lrt", "Load Removal", "Remove load times from the timer", "Utility", true),
-                new AliceSplit("igt", "Game Time", "Display In Game Time in LiveSplit Layout (CAUTION: May cause lag to LiveSplit)", "Utility", false),
                 new AliceSplit("il", "Boss Level", "Enable when running an Individual Level run", "Utility", false),
-                new AliceSplit("wqSmallAliceBug", "White Queen Small Alice Bug", "Enable to fix the Small Alice after White Queen bug", "Utility/Bigfixes", false),
+                //new AliceSplit("wqSmallAliceBug", "White Queen Small Alice Bug", "Enable to fix the Small Alice after White Queen bug", "Utility/Bugfixes", false),
 
                 // LVL020 Strange Garden
+                new AliceSplit("findAlice", "Find Alice", "Split on finding Alice", "Strange Garden", false),
                 new AliceSplit("gardenCake", "Cake", "Split on Garden Cake", "Strange Garden", true),
                 new AliceSplit("gardenPishsalver", "Pishsalver", "Split on Garden Pishsalver", "Strange Garden", true),
+                new AliceSplit("unlockHare", "March Hare", "Split on finding the March Hare", "Strange Garden", false),
                 new AliceSplit("bander0", "Bandersnatch Start", "Split on Bandersnatch Start (Full Game run only)", "Strange Garden/Bandersnatch", false),
                 new AliceSplit("bander1", "Bandersnatch Phase 1", "Split on end of Bandersnatch phase 1", "Strange Garden/Bandersnatch", false),
                 new AliceSplit("bander2", "Bandersnatch Phase 2", "Split on end of Bandersnatch phase 2", "Strange Garden/Bandersnatch", false),
@@ -237,6 +237,7 @@ namespace LiveSplit.AliceASL.Settings
                 // LVL075 Moat
 
                 // LVL080 Salazen Grum
+                new AliceSplit("sgStart", "Salazen Grum Start", "Split on entering Salazen Grum", "Salazen Grum", false),
                 new AliceSplit("sgPishsalver", "Pishsalver", "Split on Pishsalver", "Salazen Grum", true),
 
                 // LVL085 Bandersnatch Stables
