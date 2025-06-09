@@ -59,22 +59,44 @@ namespace LiveSplit.AliceASL.Settings
                     return "Dolphin NTSC";
                 case GameVersion.Invalid:
                 default:
-                    return "Invalid";
+                    return "Invalid Version";
             }
         }
 
-        private void LoadSplitComponents()
+        internal void LoadSplitComponents()
         {
+            this.Controls.Clear();
+            string gameVersion = this.GameVersionToString(this.Component.Memory.Version);
             Label lblVersion = new Label
             {
-                Location = new Point(40, 5),
-                Text = this.GameVersionToString(this.Component.Memory.Version),
+                Location = new Point(5, 10),
+                Text = gameVersion,
                 AutoSize = true,
             };
+            this.Controls.Add(lblVersion);
+#if DEBUG
+            if (gameVersion.StartsWith("Dolphin"))
+            {
+                Label lblMem1 = new Label
+                {
+                    Location = new Point(7 + lblVersion.Width, 10),
+                    Text = $"Mem 1 Address: 0x{this.Component.Memory.Mem1.ToInt64():X}",
+                    AutoSize = true,
+                };
+                this.Controls.Add(lblMem1);
+                Label lblMem2 = new Label
+                {
+                    Location = new Point(9 + lblVersion.Width + lblMem1.Width, 10),
+                    Text = $"Mem 2 Address: 0x{this.Component.Memory.Mem2.ToInt64():X}",
+                    AutoSize = true,
+                };
+                this.Controls.Add(lblMem2);
+            }
+#endif
 
             TreeView tv = new TreeView
             {
-                Location = new Point(5, 10),
+                Location = new Point(5, 25),
                 Size = new Size(400, 500),
                 CheckBoxes = true,
                 ShowNodeToolTips = true,
@@ -169,8 +191,7 @@ namespace LiveSplit.AliceASL.Settings
                 int index = this.Settings.IndexOf(split);
                 if (index == -1)
                 {
-                    split = new AliceSplit(id, name, desc, cat, enabled);
-                    this.Settings.Add(split);
+                    Trace.WriteLine($"Split with ID {id} not found. Skipping");
                     continue;
                 }
                 split.Description = desc;
@@ -197,7 +218,6 @@ namespace LiveSplit.AliceASL.Settings
                 // LVL020 Strange Garden
                 new AliceSplit("gardenCake", "Cake", "Split on Garden Cake", "Strange Garden", true),
                 new AliceSplit("gardenPishsalver", "Pishsalver", "Split on Garden Pishsalver", "Strange Garden", true),
-                new AliceSplit("unlockHare", "March Hare", "Split on finding the March Hare", "Strange Garden", false),
                 new AliceSplit("bander0", "Bandersnatch Start", "Split on Bandersnatch Start (Full Game run only)", "Strange Garden/Bandersnatch", false),
                 new AliceSplit("bander1", "Bandersnatch Phase 1", "Split on end of Bandersnatch phase 1", "Strange Garden/Bandersnatch", false),
                 new AliceSplit("bander2", "Bandersnatch Phase 2", "Split on end of Bandersnatch phase 2", "Strange Garden/Bandersnatch", false),
@@ -206,7 +226,6 @@ namespace LiveSplit.AliceASL.Settings
                 // LVL030 Tulgey Woods
 
                 // LVL040 March Hare House
-                new AliceSplit("unlockHatter", "Mad Hatter", "Split on finding the Mad Hatter", "March Hare House", true),
 
                 // LVL050 Hightopps
 

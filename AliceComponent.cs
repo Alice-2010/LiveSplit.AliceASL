@@ -43,8 +43,15 @@ namespace LiveSplit.AliceASL
 
         public void Update(IInvalidator invalidator, LiveSplitState state, float width, float height, LayoutMode mode)
         {
+            bool prevHooked = this.Memory.IsHooked;
             if (!this.Memory.HookProcess())
+            {
+                if (prevHooked)
+                    this.WriteLog("Process not hooked anymore");
                 return;
+            }
+            if (!prevHooked)
+                this.WriteLog("Process hooked successfully");
 
             this.Memory.UpdatePointerValues();
             Dictionary<string, object> previousValues = this.Memory.PreviousValues;
@@ -66,34 +73,36 @@ namespace LiveSplit.AliceASL
             float stayneHealthCurrent = Convert.ToSingle(values["StayneHealth"]);
             uint jabberwockyPhaseCurrent = Convert.ToUInt32(values["JabberwockyPhase"]);
             uint jabberwockyPhase4CounterCurrent = Convert.ToUInt32(values["JabberwockyP4Counter"]);
-            bool unlockedMarchHareCurrent = Convert.ToBoolean(values["UnlockedMarchHare"]);
-            bool unlockedHatterCurrent = Convert.ToBoolean(values["UnlockedHatter"]);
 
-            // pause LRT if game is loading
-            if (this.Settings["lrt"].Enabled)
+            if (state.CurrentPhase == TimerPhase.Running)
             {
-                this.Timer.CurrentState.IsGameTimePaused = mapIDCurrent == -1;
-                if (this.Timer.CurrentState.IsGameTimePaused)
-                    this.WriteLog("Game Time Paused: Loading");
-                else
-                    this.WriteLog("Game Time Resumed: Loading");
-            }
+                // pause LRT if game is loading
+                if (this.Settings["lrt"].Enabled)
+                {
+                    bool prevPaused = this.Timer.CurrentState.IsGameTimePaused;
+                    this.Timer.CurrentState.IsGameTimePaused = mapIDCurrent == -1;
+                    if (this.Timer.CurrentState.IsGameTimePaused != prevPaused && !prevPaused)
+                        this.WriteLog("Game Time Paused: Loading");
+                    else if (this.Timer.CurrentState.IsGameTimePaused != prevPaused && prevPaused)
+                        this.WriteLog("Game Time Resumed: Loading");
+                }
 
-            // if map is changed
-            if (mapIDCurrent != mapIDPrevious)
-                this.WriteLog($"Changed map from {mapIDPrevious} to {mapIDCurrent}");
+                // if map is changed
+                if (mapIDCurrent != mapIDPrevious)
+                    this.WriteLog($"Changed map from {mapIDPrevious} to {mapIDCurrent}");
 
-            // if not on main menu
-            if (mapIDCurrent != 0)
-            {
-                if (mapSectorCurrent != mapSectorPrevious)
-                    this.WriteLog($"Changed sector from {mapSectorPrevious} to {mapSectorCurrent} (map {mapIDCurrent})");
+                // if not on main menu
+                if (mapIDCurrent != 0)
+                {
+                    if (mapSectorCurrent != mapSectorPrevious)
+                        this.WriteLog($"Changed sector from {mapSectorPrevious} to {mapSectorCurrent} (map {mapIDCurrent})");
 
-                // display game time in layout
-                if (this.Settings["igt"].Enabled && this.Timer.CurrentState.CurrentPhase == TimerPhase.Running)
-                    this.SetTextComponent("Game Time", TimeSpan.FromSeconds(gameTimeCurrent).ToString(@"hh\:mm\:ss\.fff"));
+                    // display game time in layout
+                    if (this.Settings["igt"].Enabled)
+                        this.SetTextComponent("Game Time", TimeSpan.FromSeconds(gameTimeCurrent).ToString(@"hh\:mm\:ss\.fff"));
 
-                // TODO: Track Achievements + display on layout (depending on settings)
+                    // TODO: Track Achievements + display on layout (depending on settings)
+                }
             }
 
             // check for auto start
@@ -141,223 +150,211 @@ namespace LiveSplit.AliceASL
                     }
                 }
             }
-            else if (state.CurrentPhase != TimerPhase.NotRunning)
+
+            // check for auto reset
+            if ((state.CurrentPhase == TimerPhase.Running || state.CurrentPhase == TimerPhase.Paused) && this.Settings["reset"].Enabled)
             {
-                // check for auto reset
-                if (this.Settings["reset"].Enabled)
+                if (this.Settings["il"].Enabled)
                 {
-                    if (this.Settings["il"].Enabled)
+                    // TODO: find better addresses for ILs - maybe video number?
+                    //// bandersnatch
+                    //if (mapIDCurrent == 20 && audioStatusCurrent == 4 && mapSectorCurrent == 3)
+                    //{
+                    //    this.WriteLog("Starting New Bandersnatch Run - Resetting");
+                    //    this.Timer.Reset();
+                    //    return;
+                    //}
+
+                    //// stayne
+                    //if (mapIDCurrent == 85 && audioStatusCurrent == 4)
+                    //{
+                    //    this.WriteLog("Starting New Stayne Run - Resetting");
+                    //    this.Timer.Reset();
+                    //    return;
+                    //}
+
+                    //// jabberwocky
+                    //if (mapIDCurrent == 100 && audioStatusCurrent == 4 && mapSectorCurrent == 2)
+                    //{
+                    //    this.WriteLog("Starting New Jabberwocky Run - Resetting");
+                    //    this.Timer.Reset();
+                    //    return;
+                    //}
+                }
+                else
+                {
+                    //// full game run
+                    //if (mapIDCurrent == 10 && audioStatusCurrent == 4)
+                    //{
+                    //    this.WriteLog("Starting New Full Game Run - Resetting");
+                    //    this.Timer.Reset();
+                    //    return;
+                    //}
+                }
+            }
+
+            // check for auto split
+            if (state.CurrentPhase == TimerPhase.Running && this.Settings["split"].Enabled)
+            {
+                // LVL020 Strange Garden
+                if (mapIDCurrent == 20)
+                {
+                    if (!this.SplitsDone.Contains("gardenCake") && aliceIDCurrent == 5 && aliceIDPrevious == 4)
                     {
-                        // TODO: find better addresses for ILs - maybe video number?
-                        //// bandersnatch
-                        //if (mapIDCurrent == 20 && audioStatusCurrent == 4 && mapSectorCurrent == 3)
-                        //{
-                        //    this.WriteLog("Starting New Bandersnatch Run - Resetting");
-                        //    this.Timer.Reset();
-                        //    return;
-                        //}
-
-                        //// stayne
-                        //if (mapIDCurrent == 85 && audioStatusCurrent == 4)
-                        //{
-                        //    this.WriteLog("Starting New Stayne Run - Resetting");
-                        //    this.Timer.Reset();
-                        //    return;
-                        //}
-
-                        //// jabberwocky
-                        //if (mapIDCurrent == 100 && audioStatusCurrent == 4 && mapSectorCurrent == 2)
-                        //{
-                        //    this.WriteLog("Starting New Jabberwocky Run - Resetting");
-                        //    this.Timer.Reset();
-                        //    return;
-                        //}
+                        this.Split("gardenCake");
+                        return;
                     }
-                    else
+
+                    if (this.SplitsDone.Contains("gardenCake") && !this.SplitsDone.Contains("gardenPishsalver") && aliceIDCurrent == 4 && aliceIDPrevious == 5)
                     {
-                        //// full game run
-                        //if (mapIDCurrent == 10 && audioStatusCurrent == 4)
-                        //{
-                        //    this.WriteLog("Starting New Full Game Run - Resetting");
-                        //    this.Timer.Reset();
-                        //    return;
-                        //}
+                        this.Split("gardenPishsalver");
+                        return;
+                    }
+
+                    if (this.SplitsDone.Contains("gardenPishsalver") && !this.SplitsDone.Contains("bander0") && audioStatusCurrent == 1 && audioStatusPrevious == 4 && bandersnatchPhaseCurrent == 3)
+                    {
+                        this.Split("bander0");
+                        return;
+                    }
+
+                    if (this.SplitsDone.Contains("bander0") && !this.SplitsDone.Contains("bander1") && bandersnatchPhaseCurrent == 2)
+                    {
+                        this.Split("bander1");
+                        return;
+                    }
+
+                    if (this.SplitsDone.Contains("bander1") && !this.SplitsDone.Contains("bander2") && bandersnatchPhaseCurrent == 1)
+                    {
+                        this.Split("bander2");
+                        return;
+                    }
+
+                    if (this.SplitsDone.Contains("bander2") && !this.SplitsDone.Contains("bander3") && bandersnatchPhaseCurrent == 1 && audioStatusCurrent == 4 && audioStatusPrevious == 1)
+                    {
+                        this.Split("bander3");
+                        return;
                     }
                 }
 
-                // check for auto split
-                if (this.Settings["split"].Enabled)
+                // LVL030 Tulgey Woods
+                if (mapIDCurrent == 30)
                 {
-                    // LVL020 Strange Garden
-                    if (mapIDCurrent == 20)
+
+                }
+
+                // LVL040 March Hare House
+                if (mapIDCurrent == 40)
+                {
+                    
+                }
+
+                // LVL050 Hightopps
+                if (mapIDCurrent == 50)
+                {
+
+                }
+
+                // LVL060 Cabin
+                if (mapIDCurrent == 60)
+                {
+                    if (!this.SplitsDone.Contains("cabinPishsalver") && aliceIDCurrent == 5 && aliceIDPrevious == 4)
                     {
-                        if (!this.SplitsDone.Contains("gardenCake") && aliceIDCurrent == 5 && aliceIDPrevious == 4)
-                        {
-                            this.Split("gardenCake");
-                            return;
-                        }
+                        this.Split("cabinPishsalver");
+                        return;
+                    }
+                }
 
-                        if (this.SplitsDone.Contains("gardenCake") && !this.SplitsDone.Contains("gardenPishsalver") && aliceIDCurrent == 4 && aliceIDPrevious == 5)
-                        {
-                            this.Split("gardenPishsalver");
-                            return;
-                        }
+                // LVL070 Red Desert
+                if (mapIDCurrent == 70)
+                {
 
-                        if (this.SplitsDone.Contains("gardenPishsalver") && !this.SplitsDone.Contains("unlockHare") && unlockedMarchHareCurrent)
-                        {
-                            this.Split("unlockHare");
-                            return;
-                        }
+                }
 
-                        if (this.SplitsDone.Contains("unlockHare") && !this.SplitsDone.Contains("bander0") && audioStatusCurrent == 1 && audioStatusPrevious == 4 && bandersnatchPhaseCurrent == 3)
-                        {
-                            this.Split("bander0");
-                            return;
-                        }
+                // LVL075 Moat
+                if (mapIDCurrent == 75)
+                {
 
-                        if (this.SplitsDone.Contains("bander0") && !this.SplitsDone.Contains("bander1") && bandersnatchPhaseCurrent == 2)
-                        {
-                            this.Split("bander1");
-                            return;
-                        }
+                }
 
-                        if (this.SplitsDone.Contains("bander1") && !this.SplitsDone.Contains("bander2") && bandersnatchPhaseCurrent == 1)
-                        {
-                            this.Split("bander2");
-                            return;
-                        }
+                // LVL080 Salazen Grum
+                if (mapIDCurrent == 80)
+                {
+                    if (!this.SplitsDone.Contains("sgPishsalver") && aliceIDCurrent == 5 && aliceIDPrevious == 4)
+                    {
+                        this.Split("sgPishsalver");
+                        return;
+                    }
+                }
 
-                        if (this.SplitsDone.Contains("bander2") && !this.SplitsDone.Contains("bander3") && bandersnatchPhaseCurrent == 1 && audioStatusCurrent == 4 && audioStatusPrevious == 1)
-                        {
-                            this.Split("bander3");
-                            return;
-                        }
+                // LVL085 Bandersnatch Stables
+                if (mapIDCurrent == 85)
+                {
+                    if (this.SplitsDone.Contains("sgPishsalver") && !this.SplitsDone.Contains("stayne0") && audioStatusCurrent == 1 && audioStatusPrevious == 4 && stayneHealthCurrent == 1500f)
+                    {
+                        this.Split("stayne0");
+                        return;
                     }
 
-                    // LVL030 Tulgey Woods
-                    if (mapIDCurrent == 30)
+                    if (this.SplitsDone.Contains("stayne0") && !this.SplitsDone.Contains("stayne1") && stayneHealthCurrent <= 1000f)
                     {
-
+                        this.Split("stayne1");
+                        return;
                     }
 
-                    // LVL040 March Hare House
-                    if (mapIDCurrent == 40)
+                    if (this.SplitsDone.Contains("stayne1") && !this.SplitsDone.Contains("stayne2") && stayneHealthCurrent <= 500f)
                     {
-                        if (this.SplitsDone.Contains("bander3") && !this.SplitsDone.Contains("unlockHatter") && unlockedHatterCurrent)
-                        {
-                            this.Split("unlockHatter");
-                            return;
-                        }
+                        this.Split("stayne2");
+                        return;
                     }
 
-                    // LVL050 Hightopps
-                    if (mapIDCurrent == 50)
+                    if (this.SplitsDone.Contains("stayne2") && !this.SplitsDone.Contains("stayne3") && audioStatusCurrent == 4 && stayneHealthCurrent == 0f)
                     {
+                        this.Split("stayne3");
+                        return;
+                    }
+                }
 
+                // LVL090 Marmoreal
+                if (mapIDCurrent == 90)
+                {
+                    if (this.SplitsDone.Contains("stayne3") && !this.SplitsDone.Contains("wq") && aliceIDCurrent == 5 && aliceIDPrevious == 4)
+                    {
+                        this.Split("wq");
+                        return;
+                    }
+                }
+
+                // LVL100 Frabjous Day
+                if (mapIDCurrent == 100)
+                {
+                    if (this.SplitsDone.Contains("wq") && !this.SplitsDone.Contains("jabber0") && mapSectorCurrent == 2 && audioStatusCurrent == 1 && audioStatusPrevious == 4 && jabberwockyPhaseCurrent == 1)
+                    {
+                        this.Split("jabber0");
+                        return;
                     }
 
-                    // LVL060 Cabin
-                    if (mapIDCurrent == 60)
+                    if (this.SplitsDone.Contains("jabber0") && !this.SplitsDone.Contains("jabber1") && mapSectorCurrent == 2 && jabberwockyPhaseCurrent == 2)
                     {
-                        if (!this.SplitsDone.Contains("cabinPishsalver") && aliceIDCurrent == 5 && aliceIDPrevious == 4)
-                        {
-                            this.Split("cabinPishsalver");
-                            return;
-                        }
+                        this.Split("jabber1");
+                        return;
                     }
 
-                    // LVL070 Red Desert
-                    if (mapIDCurrent == 70)
+                    if (this.SplitsDone.Contains("jabber1") && !this.SplitsDone.Contains("jabber2") && mapSectorCurrent == 2 && jabberwockyPhaseCurrent == 3)
                     {
-
+                        this.Split("jabber2");
+                        return;
                     }
 
-                    // LVL075 Moat
-                    if (mapIDCurrent == 75)
+                    if (this.SplitsDone.Contains("jabber2") && !this.SplitsDone.Contains("jabber3") && mapSectorCurrent == 2 && jabberwockyPhaseCurrent == 4)
                     {
-
+                        this.Split("jabber3");
+                        return;
                     }
 
-                    // LVL080 Salazen Grum
-                    if (mapIDCurrent == 80)
+                    if (this.SplitsDone.Contains("jabber3") && !this.SplitsDone.Contains("jabber4") && mapSectorCurrent == 2 && jabberwockyPhase4CounterCurrent == 3)
                     {
-                        if (!this.SplitsDone.Contains("sgPishsalver") && aliceIDCurrent == 5 && aliceIDPrevious == 4)
-                        {
-                            this.Split("sgPishsalver");
-                            return;
-                        }
-                    }
-
-                    // LVL085 Bandersnatch Stables
-                    if (mapIDCurrent == 85)
-                    {
-                        if (this.SplitsDone.Contains("sgPishsalver") && !this.SplitsDone.Contains("stayne0") && audioStatusCurrent == 1 && audioStatusPrevious == 4 && stayneHealthCurrent == 1500f)
-                        {
-                            this.Split("stayne0");
-                            return;
-                        }
-
-                        if (this.SplitsDone.Contains("stayne0") && !this.SplitsDone.Contains("stayne1") && stayneHealthCurrent <= 1000f)
-                        {
-                            this.Split("stayne1");
-                            return;
-                        }
-
-                        if (this.SplitsDone.Contains("stayne1") && !this.SplitsDone.Contains("stayne2") && stayneHealthCurrent <= 500f)
-                        {
-                            this.Split("stayne2");
-                            return;
-                        }
-
-                        if (this.SplitsDone.Contains("stayne2") && !this.SplitsDone.Contains("stayne3") && audioStatusCurrent == 4 && stayneHealthCurrent == 0f)
-                        {
-                            this.Split("stayne3");
-                            return;
-                        }
-                    }
-
-                    // LVL090 Marmoreal
-                    if (mapIDCurrent == 90)
-                    {
-                        if (this.SplitsDone.Contains("stayne3") && !this.SplitsDone.Contains("wq") && aliceIDCurrent == 5 && aliceIDPrevious == 4)
-                        {
-                            this.Split("wq");
-                            return;
-                        }
-                    }
-
-                    // LVL100 Frabjous Day
-                    if (mapIDCurrent == 100)
-                    {
-                        if (this.SplitsDone.Contains("wq") && !this.SplitsDone.Contains("jabber0") && mapSectorCurrent == 2 && audioStatusCurrent == 1 && audioStatusPrevious == 4 && jabberwockyPhaseCurrent == 1)
-                        {
-                            this.Split("jabber0");
-                            return;
-                        }
-
-                        if (this.SplitsDone.Contains("jabber0") && !this.SplitsDone.Contains("jabber1") && mapSectorCurrent == 2 && jabberwockyPhaseCurrent == 2)
-                        {
-                            this.Split("jabber1");
-                            return;
-                        }
-
-                        if (this.SplitsDone.Contains("jabber1") && !this.SplitsDone.Contains("jabber2") && mapSectorCurrent == 2 && jabberwockyPhaseCurrent == 3)
-                        {
-                            this.Split("jabber2");
-                            return;
-                        }
-
-                        if (this.SplitsDone.Contains("jabber2") && !this.SplitsDone.Contains("jabber3") && mapSectorCurrent == 2 && jabberwockyPhaseCurrent == 4)
-                        {
-                            this.Split("jabber3");
-                            return;
-                        }
-
-                        if (this.SplitsDone.Contains("jabber3") && !this.SplitsDone.Contains("jabber4") && mapSectorCurrent == 2 && jabberwockyPhase4CounterCurrent == 3)
-                        {
-                            this.Split("jabber4");
-                            return;
-                        }
+                        this.Split("jabber4");
+                        return;
                     }
                 }
 
@@ -375,11 +372,11 @@ namespace LiveSplit.AliceASL
             AliceSplit split = this.Settings[splitID];
             if (split == null)
             {
-                this.WriteLog($"Split `{splitID}` not found in settings");
+                this.WriteLog($"Split `{splitID}` not found in settings. Ignoring split attempt");
                 return;
             }
             this.SplitsDone.Add(split.ID);
-            this.WriteLog($"Splitting `{split.Name}`");
+            this.WriteLog($"Splitting `{split.ID}`"); // Use ID instead of name as it's unique
             if (split.Enabled)
                 this.Timer.Split();
         }
@@ -401,8 +398,8 @@ namespace LiveSplit.AliceASL
         {
             // remove the last split from the list
             // this will allow the ASL to resplit if a false positive happens and the user undoes the split
-            this.SplitsDone.RemoveAt(this.SplitsDone.Count - 1);
             this.WriteLog("Undoing last split");
+            this.SplitsDone.RemoveAt(this.SplitsDone.Count - 1);
         }
 
         private void SetTextComponent(string id, string text)
@@ -424,14 +421,15 @@ namespace LiveSplit.AliceASL
 
         private void WriteLog(string text, bool append = true)
         {
+            string timeFormat = this.Settings["il"].Enabled ? @"hh\:mm\:ss\.fff" : @"hh\:mm\:ss";
             string log = "[Debug";
             // NOTE: If the timer has started, then show the LRT time in log
             if (this.Timer.CurrentState.CurrentPhase != TimerPhase.NotRunning)
             {
                 // If comparing against IGT, get IGT/LRT time, else use RTA
                 string time = this.Timer.CurrentState.CurrentTimingMethod == TimingMethod.GameTime
-                    ? this.Timer.CurrentState.CurrentTime.GameTime.ToString()
-                    : this.Timer.CurrentState.CurrentTime.RealTime.ToString();
+                    ? this.Timer.CurrentState.CurrentTime.GameTime?.ToString(timeFormat)
+                    : this.Timer.CurrentState.CurrentTime.RealTime?.ToString(timeFormat);
                 if (time != "")
                     log += $" {time} {(this.Timer.CurrentState.CurrentTimingMethod == TimingMethod.RealTime ? "RTA" : "LRT")}";
             }

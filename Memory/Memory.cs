@@ -51,29 +51,26 @@ namespace LiveSplit.AliceASL.Memory
 
     public static class MemoryReader
     {
-        public static T SwapEndian<T>(T value) where T : struct
-        {
-            byte[] bytes = BitConverter.GetBytes((dynamic)value);
-            Array.Reverse(bytes);
-            return (T)Convert.ChangeType(BitConverter.ToUInt64(bytes, 0), typeof(T));
-        }
-
-        private static int OffsetAddress(this Process targetProcess, ref IntPtr address, params int[] offsets)
+        private static int OffsetAddress(Process targetProcess, ref IntPtr address, params int[] offsets)
         {
             byte[] buffer = new byte[4];
-            int bytesRead;
+            // Deepcopy so we don't modify the ref param
+            IntPtr baseAddr = new IntPtr(address.ToInt64());
             for (int i = 0; i < offsets.Length - 1; i++)
             {
-                WinAPI.ReadProcessMemory(targetProcess.Handle, address + offsets[i], buffer, buffer.Length, out bytesRead);
+                WinAPI.ReadProcessMemory(targetProcess.Handle, address + offsets[i], buffer, buffer.Length, out int bytesRead);
+                if (bytesRead != buffer.Length) { break; }
+                if (targetProcess.ProcessName == "Dolphin")
+                    Array.Reverse(buffer);
                 address = (IntPtr)BitConverter.ToUInt32(buffer, 0);
                 if (address == IntPtr.Zero) { break; }
                 if (targetProcess.ProcessName == "Dolphin")
-                    address = (IntPtr)(SwapEndian((uint)address) - 0x80000000);
+                    address = (IntPtr)(baseAddr.ToInt64() + (address.ToInt64() - 0x80000000)); // Dolphin uses a different base address
             }
             return offsets.Length > 0 ? offsets[offsets.Length - 1] : 0;
         }
 
-        public static T Read<T>(this Process targetProcess, IntPtr address, params int[] offsets) where T : struct
+        public static T Read<T>(Process targetProcess, IntPtr address, params int[] offsets) where T : struct
         {
             if (targetProcess == null || address == IntPtr.Zero) { return default; }
 
@@ -89,13 +86,15 @@ namespace LiveSplit.AliceASL.Memory
             object obj = ResolveToType(buffer, type);
             return (T)obj;
         }
-        public static byte[] Read(this Process targetProcess, IntPtr address, int numBytes)
+        public static byte[] Read(Process targetProcess, IntPtr address, int numBytes)
         {
             byte[] buffer = new byte[numBytes];
             if (targetProcess == null || address == IntPtr.Zero) { return buffer; }
 
-            int bytesRead;
-            WinAPI.ReadProcessMemory(targetProcess.Handle, address, buffer, numBytes, out bytesRead);
+            WinAPI.ReadProcessMemory(targetProcess.Handle, address, buffer, numBytes, out int bytesRead);
+            if (bytesRead != numBytes) { return default; }
+            if (targetProcess.ProcessName == "Dolphin")
+                Array.Reverse(buffer);
             return buffer;
         }
         private static object ResolveToType(byte[] bytes, Type type)
@@ -153,12 +152,12 @@ namespace LiveSplit.AliceASL.Memory
             }
         }
 
-        public static string ReadString(this Process targetProcess, IntPtr address, int length, Encoding encoding)
+        public static string ReadString(Process targetProcess, IntPtr address, int length, Encoding encoding)
         {
-            if (targetProcess == null || address == IntPtr.Zero) { return string.Empty; }
+            if (targetProcess == null || address == IntPtr.Zero) { return default; }
             byte[] data = new byte[length];
             WinAPI.ReadProcessMemory(targetProcess.Handle, address, data, length, out int bytesRead);
-            if (bytesRead != length) { return string.Empty; }
+            if (bytesRead != length) { return default; }
             return encoding.GetString(data);
         }
     }

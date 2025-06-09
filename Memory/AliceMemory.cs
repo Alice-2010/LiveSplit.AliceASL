@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Text;
 
 namespace LiveSplit.AliceASL.Memory
 {
@@ -18,8 +19,8 @@ namespace LiveSplit.AliceASL.Memory
     {
         public IntPtr Mem1 { get; private set; } = IntPtr.Zero;
         public IntPtr Mem2 { get; private set; } = IntPtr.Zero;
-        public Process Proc { get; private set; }
-        private AliceAddresses Addresses { get; set; }
+        public Process Proc { get; private set; } = null;
+        private AliceAddresses Addresses { get; set; } = null;
         internal Dictionary<string, object> Pointers { get; set; } = new Dictionary<string, object>();
         public Dictionary<string, object> PreviousValues { get; private set; } = new Dictionary<string, object>();
         public Dictionary<string, object> CurrentValues { get; private set; } = new Dictionary<string, object>();
@@ -27,17 +28,14 @@ namespace LiveSplit.AliceASL.Memory
         private DateTime lastHooked = DateTime.MinValue;
         public bool IsHooked { get; private set; } = false;
 
-        public AliceMemory()
-        {
-            this.lastHooked = DateTime.MinValue;
-        }
+        public AliceMemory() {}
 
         public bool HookProcess()
         {
-            this.Mem1 = IntPtr.Zero;
-            this.Mem2 = IntPtr.Zero;
-            this.Addresses = null;
-            this.IsHooked = this.Proc != null && !this.Proc.HasExited;
+            this.IsHooked = this.Proc != null && !this.Proc.HasExited && 
+                (this.Proc.ProcessName.StartsWith("Dolphin")
+                    ? this.Mem1 != IntPtr.Zero && this.Mem2 != IntPtr.Zero
+                    : true);
             if (!this.IsHooked && DateTime.Now > this.lastHooked.AddSeconds(1))
             {
                 this.lastHooked = DateTime.Now;
@@ -53,16 +51,15 @@ namespace LiveSplit.AliceASL.Memory
                         this.Version = GameVersion.Steam;
                     else if (this.Proc.ProcessName.StartsWith("Dolphin"))
                     {
+                        this.Mem1 = IntPtr.Zero;
+                        this.Mem2 = IntPtr.Zero;
                         foreach (MemoryBasicInformation item in this.Proc.MemoryPages(true))
                         {
                             if (item.Type == MemPageType.MEM_MAPPED && item.AllocationProtect == MemPageProtect.PAGE_READWRITE &&
                                 item.State == MemPageState.MEM_COMMIT && item.Protect == MemPageProtect.PAGE_READWRITE && (int)item.RegionSize == 0x2000000)
                             {
                                 this.Mem1 = item.BaseAddress;
-                                this.Mem2 = (IntPtr)(
-                                    long.Parse(item.BaseAddress.ToString(), System.Globalization.NumberStyles.HexNumber) +
-                                    long.Parse(item.RegionSize.ToString(), System.Globalization.NumberStyles.HexNumber)
-                                );
+                                this.Mem2 = (IntPtr)((long)item.BaseAddress + (int)item.RegionSize);
                                 break;
                             }
                         }
@@ -70,7 +67,7 @@ namespace LiveSplit.AliceASL.Memory
                             this.Version = GameVersion.Invalid;
                         else
                         {
-                            switch (this.Proc.ReadString(this.Mem1, 6))
+                            switch (MemoryReader.ReadString(this.Proc, this.Mem1, 6, Encoding.Default))
                             {
                                 case "SALP4Q":
                                     this.Version = GameVersion.DolphinPAL;
@@ -85,11 +82,18 @@ namespace LiveSplit.AliceASL.Memory
                         }
                     }
                     else if (this.Proc == null || this.Proc.HasExited)
-                    {
-                        this.IsHooked = false;
                         this.Version = GameVersion.Invalid;
-                    }
                 }
+                else
+                    this.Version = GameVersion.Invalid;
+            }
+            if (this.Version == GameVersion.Invalid)
+            {
+                this.IsHooked = false;
+                this.Mem1 = IntPtr.Zero;
+                this.Mem2 = IntPtr.Zero;
+                this.Addresses = null;
+                this.Proc = null;
             }
             if (this.IsHooked)
             {
@@ -111,8 +115,6 @@ namespace LiveSplit.AliceASL.Memory
             this.Pointers.Add("StayneHealth", this.Addresses.StayneHealthPtr);
             this.Pointers.Add("JabberwockyPhase", this.Addresses.JabberwockyPhasePtr);
             this.Pointers.Add("JabberwockyP4Counter", this.Addresses.JabberwockyPhase4CounterPtr);
-            this.Pointers.Add("UnlockedMarchHare", this.Addresses.UnlockedMarchHarePtr);
-            this.Pointers.Add("UnlockedHatter", this.Addresses.UnlockedHatterPtr);
         }
 
         public void UpdatePointerValues()
@@ -140,11 +142,6 @@ namespace LiveSplit.AliceASL.Memory
                     case "StayneHealth":
                         this.PreviousValues[key] = this.CurrentValues.ContainsKey(key) ? (float)this.CurrentValues[key] : default;
                         this.CurrentValues[key] = ((Pointer<float>)value).Read(this.Proc);
-                        break;
-                    case "UnlockedMarchHare":
-                    case "UnlockedHatter":
-                        this.PreviousValues[key] = this.CurrentValues.ContainsKey(key) ? (bool)this.CurrentValues[key] : default;
-                        this.CurrentValues[key] = ((Pointer<bool>)value).Read(this.Proc);
                         break;
                     default:
                         break;

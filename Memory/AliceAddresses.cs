@@ -17,7 +17,7 @@ namespace LiveSplit.AliceASL.Memory
         }
         public T Read(Process process)
         {
-            return process.Read<T>(this.BaseAddress, this.Offsets);
+            return MemoryReader.Read<T>(process, this.BaseAddress, this.Offsets);
         }
 
         public void Write(Process process, T value)
@@ -64,7 +64,7 @@ namespace LiveSplit.AliceASL.Memory
                         pointer = new Pointer<Single>(this.Process.MainModule.BaseAddress, 0x44B8A8, 0x8C, 0x44, 0x10);
                         break;
                     case GameVersion.DolphinPAL:
-                        pointer = new Pointer<Single>(this.Mem1, 0x61CAE4);
+                        pointer = new Pointer<Single>(this.Mem1, 0x5F48D8, 0x8C, 0x44, 0x10);
                         break;
                     case GameVersion.DolphinNTSC:
                     case GameVersion.Invalid:
@@ -86,7 +86,7 @@ namespace LiveSplit.AliceASL.Memory
                         pointer = new Pointer<Int32>(this.Process.MainModule.BaseAddress, 0x44B8A8, 0x8C, 0x2BC);
                         break;
                     case GameVersion.DolphinPAL:
-                        pointer = new Pointer<Int32>(this.Mem1, 0x77F870);
+                        pointer = new Pointer<Int32>(this.Mem1, 0x5F48D8, 0x8C, 0x24C);
                         break;
                     case GameVersion.DolphinNTSC:
                     case GameVersion.Invalid:
@@ -109,7 +109,7 @@ namespace LiveSplit.AliceASL.Memory
                         pointer = new Pointer<Int32>(this.Process.MainModule.BaseAddress, 0x44B8A8, 0x8C, 0x18, 0x18);
                         break;
                     case GameVersion.DolphinPAL:
-                        pointer = new Pointer<Int32>(this.Mem1, 0x77676C);
+                        pointer = new Pointer<Int32>(this.Mem1, 0x5F48D8, 0x8C, 0x18, 0x18);
                         break;
                     case GameVersion.DolphinNTSC:
                     case GameVersion.Invalid:
@@ -132,7 +132,7 @@ namespace LiveSplit.AliceASL.Memory
                         pointer = new Pointer<UInt32>(this.Process.MainModule.BaseAddress, 0x44B8A8, 0x8C, 0x8, 0x28, 0x9D0);
                         break;
                     case GameVersion.DolphinPAL:
-                        pointer = new Pointer<UInt32>(this.Mem1, 0x7DE5D4, 0x9D0);
+                        pointer = new Pointer<UInt32>(this.Mem1, 0x5F48D8, 0x8C, 0x8, 0x28, 0x9D0);
                         break;
                     case GameVersion.DolphinNTSC:
                     case GameVersion.Invalid:
@@ -155,7 +155,7 @@ namespace LiveSplit.AliceASL.Memory
                         pointer = new Pointer<UInt32>(this.Process.MainModule.BaseAddress, 0x44B8A8, 0x1C, 0xC, 0x0, 0x4, 0x16C);
                         break;
                     case GameVersion.DolphinPAL:
-                        pointer = new Pointer<UInt32>(this.Mem1, 0x7FCA10);
+                        pointer = new Pointer<UInt32>(this.Mem1, 0x5F48D8, 0x1C, 0xC, 0x0, 0x4, 0x158);
                         break;
                     case GameVersion.DolphinNTSC:
                     case GameVersion.Invalid:
@@ -178,7 +178,7 @@ namespace LiveSplit.AliceASL.Memory
                         pointer = new Pointer<UInt32>(this.Process.MainModule.BaseAddress, 0x44B8A8, 0x90, 0x54, 0x15C, 0x1C);
                         break;
                     case GameVersion.DolphinPAL:
-                        pointer = new Pointer<UInt32>(this.Mem1, 0x7DA380);
+                        pointer = new Pointer<UInt32>(this.Mem1, 0x5F48D8, 0x90, 0x54, 0x148, 0x1C);
                         break;
                     case GameVersion.DolphinNTSC:
                     case GameVersion.Invalid:
@@ -201,7 +201,7 @@ namespace LiveSplit.AliceASL.Memory
                         pointer = new Pointer<Single>(this.Process.MainModule.BaseAddress, 0x44B8A8, 0x8C, 0x4, 0x58, 0x3D0);
                         break;
                     case GameVersion.DolphinPAL:
-                        pointer = new Pointer<Single>(this.Mem1, 0x6F4FE4, 0x4F8);
+                        pointer = new Pointer<Single>(this.Mem1, 0x5F48D8, 0x8C, 0x4, 0x58, 0x4F8);
                         break;
                     case GameVersion.DolphinNTSC:
                     case GameVersion.Invalid:
@@ -253,48 +253,6 @@ namespace LiveSplit.AliceASL.Memory
                     case GameVersion.Invalid:
                     default:
                         pointer = new Pointer<UInt32>(IntPtr.Zero);
-                        break;
-                }
-                return pointer;
-            }
-        }
-
-        public Pointer<Boolean> UnlockedMarchHarePtr
-        {
-            get
-            {
-                Pointer<Boolean> pointer;
-                switch (this.GameVersion)
-                {
-                    case GameVersion.Steam:
-                        pointer = new Pointer<Boolean>(this.Process.MainModule.BaseAddress, 0x44B8A8, 0x90, 0x54, 0x20C, 0x1C);
-                        break;
-                    case GameVersion.DolphinPAL:
-                    case GameVersion.DolphinNTSC:
-                    case GameVersion.Invalid:
-                    default:
-                        pointer = new Pointer<Boolean>(IntPtr.Zero);
-                        break;
-                }
-                return pointer;
-            }
-        }
-
-        public Pointer<Boolean> UnlockedHatterPtr
-        {
-            get
-            {
-                Pointer<Boolean> pointer;
-                switch (this.GameVersion)
-                {
-                    case GameVersion.Steam:
-                        pointer = new Pointer<Boolean>(this.Process.MainModule.BaseAddress, 0x44B8A8, 0x90, 0x54, 0x21C, 0x1C);
-                        break;
-                    case GameVersion.DolphinPAL:
-                    case GameVersion.DolphinNTSC:
-                    case GameVersion.Invalid:
-                    default:
-                        pointer = new Pointer<Boolean>(IntPtr.Zero);
                         break;
                 }
                 return pointer;
